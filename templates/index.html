@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subdomain Takeover Checker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>🛡️ Subdomain Takeover Checker</h1>
+    <textarea id="domains" placeholder="Enter one or more subdomains..."></textarea><br>
+    <button onclick="checkDomains()">Check for Vulnerabilities</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function checkDomains() {
+            const input = document.getElementById('domains').value;
+            document.getElementById('results').innerHTML = "⏳ Checking...";
+            const res = await fetch("/check", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domains: input })
+            });
+            const data = await res.json();
+            let html = "<h2>Results</h2><ul>";
+            for (let item of data) {
+                html += `<li><strong>${item.domain}</strong><br>
+                         CNAME: ${item.cname}<br>
+                         Status: ${item.status}<br>
+                         ${item.vulnerable ? `<span style='color:red;'>⚠️ VULNERABLE (${item.reason})</span>` : "✅ Safe"}</li><br>`;
+            }
+            html += "</ul>";
+            document.getElementById('results').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
